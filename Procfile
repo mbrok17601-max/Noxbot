@@ -1,1 +1,1 @@
-python Noxbot
+worker: python Noxbot

@@ -6,62 +6,18 @@ from telegram.ext import (
     MessageHandler, filters, ContextTypes
 )
 
-# ============================================================
-# KONFIGURASI - EDIT BAGIAN INI
-# ============================================================
-BOT_TOKEN = "8971350855:AAGPij0fQoVi3p734TOwxGyX8QTaYtFtTXg"  # dari @BotFather
-ADMIN_ID = 6829520371  # ID Telegram lu (cek via @userinfobot)
-
-JAM_BUKA = 8   # jam 08.00
-JAM_TUTUP = 21 # jam 21.00
-
+BOT_TOKEN = "8971350855:AAGPij0fQoVi3p734TOwxGyX8QTaYtFtTXg"
+ADMIN_ID = 6829ISI_TOKEN_LU_DISINI520371
+ADMIN_USERNAME = "@Skuy"
+JAM_BUKA = 8
+JAM_TUTUP = 21
 NAMA_TOKO = "NoxStore 🛒"
-NOMOR_WA = "08xxxxxxxxxx"  # 
 
-# ============================================================
-# DATA PRODUK - EDIT SESUAI HARGA LU
-# ============================================================
 PRODUK = {
-    "capcut": {
-        "nama": "CapCut Pro",
-        "emoji": "🎬",
-        "harga": {
-            "1 Bulan": "Rp 15.000",
-            "3 Bulan": "Rp 40.000",
-            "1 Tahun": "Rp 130.000",
-        },
-        "deskripsi": "Akses semua fitur premium CapCut termasuk template eksklusif, tanpa watermark, dan efek pro."
-    },
-    "canva": {
-        "nama": "Canva Pro",
-        "emoji": "🎨",
-        "harga": {
-            "1 Bulan": "Rp 20.000",
-            "3 Bulan": "Rp 55.000",
-            "1 Tahun": "Rp 180.000",
-        },
-        "deskripsi": "Akses semua template premium, background remover, brand kit, dan storage unlimited."
-    },
-    "spotify": {
-        "nama": "Spotify Premium",
-        "emoji": "🎵",
-        "harga": {
-            "1 Bulan": "Rp 18.000",
-            "3 Bulan": "Rp 50.000",
-            "1 Tahun": "Rp 170.000",
-        },
-        "deskripsi": "Musik tanpa iklan, download offline, kualitas audio tinggi, skip unlimited."
-    },
-    "youtube": {
-        "nama": "YouTube Premium",
-        "emoji": "▶️",
-        "harga": {
-            "1 Bulan": "Rp 20.000",
-            "3 Bulan": "Rp 55.000",
-            "1 Tahun": "Rp 190.000",
-        },
-        "deskripsi": "Nonton tanpa iklan, download video, YouTube Music Premium, Picture-in-Picture."
-    },
+    "capcut": {"nama": "CapCut Pro", "emoji": "🎬", "harga": {"1 Bulan": "Rp 15.000", "3 Bulan": "Rp 40.000", "1 Tahun": "Rp 130.000"}, "deskripsi": "Akses semua fitur premium CapCut termasuk template eksklusif, tanpa watermark, dan efek pro."},
+    "canva": {"nama": "Canva Pro", "emoji": "🎨", "harga": {"1 Bulan": "Rp 20.000", "3 Bulan": "Rp 55.000", "1 Tahun": "Rp 180.000"}, "deskripsi": "Akses semua template premium, background remover, brand kit, dan storage unlimited."},
+    "spotify": {"nama": "Spotify Premium", "emoji": "🎵", "harga": {"1 Bulan": "Rp 18.000", "3 Bulan": "Rp 50.000", "1 Tahun": "Rp 170.000"}, "deskripsi": "Musik tanpa iklan, download offline, kualitas audio tinggi, skip unlimited."},
+    "youtube": {"nama": "YouTube Premium", "emoji": "▶️", "harga": {"1 Bulan": "Rp 20.000", "3 Bulan": "Rp 55.000", "1 Tahun": "Rp 190.000"}, "deskripsi": "Nonton tanpa iklan, download video, YouTube Music Premium, Picture-in-Picture."},
 }
 
 FAQ = [
@@ -72,228 +28,96 @@ FAQ = [
     ("Bisa request produk lain?", "📦 Bisa! Hubungi admin dan kami akan usahakan secepatnya."),
 ]
 
-# ============================================================
-# FUNGSI HELPER
-# ============================================================
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def jam_kerja():
-    jam_sekarang = datetime.now().hour
-    return JAM_BUKA <= jam_sekarang < JAM_TUTUP
+    return JAM_BUKA <= datetime.now().hour < JAM_TUTUP
 
 def pesan_tutup():
-    return (
-        f"🌙 *Toko sedang tutup*\n\n"
-        f"Jam operasional kami: {JAM_BUKA:02d}.00 - {JAM_TUTUP:02d}.00 WIB\n\n"
-        f"Pesanmu sudah kami catat ya! Admin akan membalas saat toko buka. "
-        f"Atau kamu bisa tinggalkan pesan di sini 😊"
-    )
+    return f"🌙 *Toko sedang tutup*\n\nJam operasional: {JAM_BUKA:02d}.00 - {JAM_TUTUP:02d}.00 WIB\n\nPesanmu sudah kami catat! Admin akan membalas saat toko buka 😊"
 
-# ============================================================
-# HANDLER
-# ============================================================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     keyboard = [
         [InlineKeyboardButton("🛒 Lihat Produk", callback_data="menu_produk")],
-        [InlineKeyboardButton("❓ FAQ", callback_data="menu_faq"),
-         InlineKeyboardButton("📞 Hubungi Admin", callback_data="menu_admin")],
+        [InlineKeyboardButton("❓ FAQ", callback_data="menu_faq"), InlineKeyboardButton("📞 Hubungi Admin", callback_data="menu_admin")],
         [InlineKeyboardButton("🔥 Cara Order", callback_data="menu_order")],
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text(
-        f"Halo *{user.first_name}* 👋\n\n"
-        f"Selamat datang di *{NAMA_TOKO}*!\n"
-        f"Kami menyediakan langganan premium dengan harga terjangkau & bergaransi 🔥\n\n"
-        f"Pilih menu di bawah ya:",
-        parse_mode="Markdown",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text(f"Halo *{user.first_name}* 👋\n\nSelamat datang di *{NAMA_TOKO}*!\nLangganan premium harga terjangkau & bergaransi 🔥\n\nPilih menu di bawah ya:", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def menu_produk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
-    keyboard = []
-    for key, produk in PRODUK.items():
-        keyboard.append([InlineKeyboardButton(
-            f"{produk['emoji']} {produk['nama']}",
-            callback_data=f"produk_{key}"
-        )])
+    keyboard = [[InlineKeyboardButton(f"{p['emoji']} {p['nama']}", callback_data=f"produk_{k}")] for k, p in PRODUK.items()]
     keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data="menu_utama")])
-
-    await query.edit_message_text(
-        "🛒 *Pilih produk yang kamu mau:*",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text("🛒 *Pilih produk yang kamu mau:*", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def detail_produk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     key = query.data.replace("produk_", "")
     produk = PRODUK.get(key)
-
-    if not produk:
-        await query.edit_message_text("Produk tidak ditemukan.")
-        return
-
-    harga_text = "\n".join([f"  • {durasi}: *{harga}*" for durasi, harga in produk['harga'].items()])
-    keyboard = [
-        [InlineKeyboardButton(f"✅ Order {produk['nama']}", callback_data=f"order_{key}")],
-        [InlineKeyboardButton("🔙 Kembali", callback_data="menu_produk")],
-    ]
-
-    await query.edit_message_text(
-        f"{produk['emoji']} *{produk['nama']}*\n\n"
-        f"_{produk['deskripsi']}_\n\n"
-        f"💰 *Harga:*\n{harga_text}\n\n"
-        f"Tap tombol di bawah untuk order!",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    harga_text = "\n".join([f"  • {d}: *{h}*" for d, h in produk['harga'].items()])
+    keyboard = [[InlineKeyboardButton(f"✅ Order {produk['nama']}", callback_data=f"order_{key}")], [InlineKeyboardButton("🔙 Kembali", callback_data="menu_produk")]]
+    await query.edit_message_text(f"{produk['emoji']} *{produk['nama']}*\n\n_{produk['deskripsi']}_\n\n💰 *Harga:*\n{harga_text}\n\nTap tombol di bawah untuk order!", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def order_produk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     key = query.data.replace("order_", "")
     produk = PRODUK.get(key)
-
+    user = query.from_user
     if not jam_kerja():
         await query.edit_message_text(pesan_tutup(), parse_mode="Markdown")
-        # Notif ke admin
-        await context.bot.send_message(
-            ADMIN_ID,
-            f"📬 Ada order masuk di luar jam kerja!\n"
-            f"User: {query.from_user.full_name} (@{query.from_user.username})\n"
-            f"Produk: {produk['nama']}"
-        )
+        await context.bot.send_message(ADMIN_ID, f"📬 Order di luar jam kerja!\nUser: {user.full_name} (@{user.username})\nProduk: {produk['nama']}")
         return
-
-    user = query.from_user
-    # Kirim notif ke admin
-    await context.bot.send_message(
-        ADMIN_ID,
-        f"🔔 *ORDER BARU!*\n\n"
-        f"👤 Nama: {user.full_name}\n"
-        f"🆔 Username: @{user.username}\n"
-        f"📦 Produk: {produk['emoji']} {produk['nama']}\n\n"
-        f"Segera hubungi customer!",
-        parse_mode="Markdown"
-    )
-
+    await context.bot.send_message(ADMIN_ID, f"🔔 *ORDER BARU!*\n\n👤 {user.full_name}\n🆔 @{user.username}\n📦 {produk['emoji']} {produk['nama']}\n\nSegera hubungi customer!", parse_mode="Markdown")
     keyboard = [[InlineKeyboardButton("🔙 Menu Utama", callback_data="menu_utama")]]
-    await query.edit_message_text(
-        f"✅ *Order {produk['nama']} diterima!*\n\n"
-        f"Admin kami akan segera menghubungi kamu untuk konfirmasi dan pembayaran.\n\n"
-        f"Mohon tunggu sebentar ya 🙏",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text(f"✅ *Order {produk['nama']} diterima!*\n\nAdmin akan segera menghubungi kamu 🙏", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def menu_faq(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
-    faq_text = ""
-    for i, (pertanyaan, jawaban) in enumerate(FAQ, 1):
-        faq_text += f"*{i}. {pertanyaan}*\n{jawaban}\n\n"
-
+    faq_text = "".join([f"*{i}. {p}*\n{j}\n\n" for i, (p, j) in enumerate(FAQ, 1)])
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data="menu_utama")]]
-    await query.edit_message_text(
-        f"❓ *FAQ - Pertanyaan Umum*\n\n{faq_text}",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text(f"❓ *FAQ*\n\n{faq_text}", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def menu_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data="menu_utama")]]
-    await query.edit_message_text(
-        f"📞 *Hubungi Admin*\n\n"
-        f"Klik username di bawah untuk chat langsung:\n"
-        f"👤 Admin: @ISI_USERNAME_ADMIN_LU\n\n"
-        f"Jam operasional: {JAM_BUKA:02d}.00 - {JAM_TUTUP:02d}.00 WIB\n\n"
-        f"_Di luar jam operasional, pesan akan dibalas saat toko buka_ 😊",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text(f"📞 *Hubungi Admin*\n\n👤 Admin: {ADMIN_USERNAME}\n\nJam operasional: {JAM_BUKA:02d}.00 - {JAM_TUTUP:02d}.00 WIB\n\n_Di luar jam operasional, pesan akan dibalas saat toko buka_ 😊", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def menu_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
-    keyboard = [
-        [InlineKeyboardButton("🛒 Order Sekarang", callback_data="menu_produk")],
-        [InlineKeyboardButton("🔙 Kembali", callback_data="menu_utama")],
-    ]
-    await query.edit_message_text(
-        "🔥 *Cara Order:*\n\n"
-        "1️⃣ Pilih produk yang kamu mau\n"
-        "2️⃣ Tap tombol *Order*\n"
-        "3️⃣ Admin akan menghubungi kamu\n"
-        "4️⃣ Lakukan pembayaran\n"
-        "5️⃣ Akun premium langsung aktif! ⚡\n\n"
-        "Mudah kan? Yuk langsung order! 😊",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    keyboard = [[InlineKeyboardButton("🛒 Order Sekarang", callback_data="menu_produk")], [InlineKeyboardButton("🔙 Kembali", callback_data="menu_utama")]]
+    await query.edit_message_text("🔥 *Cara Order:*\n\n1️⃣ Pilih produk\n2️⃣ Tap tombol Order\n3️⃣ Admin menghubungi kamu\n4️⃣ Lakukan pembayaran\n5️⃣ Akun langsung aktif! ⚡", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def menu_utama(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     keyboard = [
         [InlineKeyboardButton("🛒 Lihat Produk", callback_data="menu_produk")],
-        [InlineKeyboardButton("❓ FAQ", callback_data="menu_faq"),
-         InlineKeyboardButton("📞 Hubungi Admin", callback_data="menu_admin")],
+        [InlineKeyboardButton("❓ FAQ", callback_data="menu_faq"), InlineKeyboardButton("📞 Hubungi Admin", callback_data="menu_admin")],
         [InlineKeyboardButton("🔥 Cara Order", callback_data="menu_order")],
     ]
-    await query.edit_message_text(
-        f"🏠 *Menu Utama {NAMA_TOKO}*\n\nPilih menu di bawah:",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text(f"🏠 *Menu Utama {NAMA_TOKO}*\n\nPilih menu di bawah:", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def pesan_masuk(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle pesan teks biasa dari user"""
     user = update.effective_user
     pesan = update.message.text
-
     if not jam_kerja():
         await update.message.reply_text(pesan_tutup(), parse_mode="Markdown")
-        await context.bot.send_message(
-            ADMIN_ID,
-            f"💬 *Pesan masuk (di luar jam kerja)*\n\n"
-            f"👤 {user.full_name} (@{user.username})\n"
-            f"📝 \"{pesan}\"",
-            parse_mode="Markdown"
-        )
+        await context.bot.send_message(ADMIN_ID, f"💬 *Pesan masuk (luar jam kerja)*\n\n👤 {user.full_name} (@{user.username})\n📝 \"{pesan}\"", parse_mode="Markdown")
     else:
         keyboard = [[InlineKeyboardButton("🛒 Lihat Menu", callback_data="menu_produk")]]
-        await update.message.reply_text(
-            f"Halo! Ada yang bisa kami bantu? 😊\n\n"
-            f"Ketik /start untuk melihat menu lengkap, atau langsung pilih produk di bawah:",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-        await context.bot.send_message(
-            ADMIN_ID,
-            f"💬 *Pesan masuk*\n\n"
-            f"👤 {user.full_name} (@{user.username})\n"
-            f"📝 \"{pesan}\"",
-            parse_mode="Markdown"
-        )
+        await update.message.reply_text("Halo! Ada yang bisa kami bantu? 😊\n\nKetik /start untuk menu lengkap:", reply_markup=InlineKeyboardMarkup(keyboard))
+        await context.bot.send_message(ADMIN_ID, f"💬 *Pesan masuk*\n\n👤 {user.full_name} (@{user.username})\n📝 \"{pesan}\"", parse_mode="Markdown")
 
-# ============================================================
-# MAIN
-# ============================================================
 def main():
     app = Application.builder().token(BOT_TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(menu_produk, pattern="^menu_produk$"))
     app.add_handler(CallbackQueryHandler(menu_faq, pattern="^menu_faq$"))
@@ -303,8 +127,7 @@ def main():
     app.add_handler(CallbackQueryHandler(detail_produk, pattern="^produk_"))
     app.add_handler(CallbackQueryHandler(order_produk, pattern="^order_"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, pesan_masuk))
-
-    print(f"✅ Bot {NAMA_TOKO} berjalan...")
+    print(f"✅ {NAMA_TOKO} berjalan...")
     app.run_polling()
 
 if __name__ == "__main__":
